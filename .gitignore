@@ -1,0 +1,16 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/SnakesAndLadders/.vs
+/SnakesAndLadders/SnakesAndLadders.Application/bin/Debug/net6.0
+/SnakesAndLadders/SnakesAndLadders.Application/obj
+/SnakesAndLadders/SnakesAndLadders.Application.Tests/bin/Debug/net6.0
+/SnakesAndLadders/SnakesAndLadders.Application.Tests/obj
+/SnakesAndLadders/SnakesAndLadders.Data/bin/Debug/net6.0
+/SnakesAndLadders/SnakesAndLadders.Data/obj
+/SnakesAndLadders/SnakesAndLadders.UI/bin/Debug/net6.0
+/SnakesAndLadders/SnakesAndLadders.UI/obj
+/SnakesAndLadders/SnakesAndLadders.WebApi/bin/Debug/net6.0
+/SnakesAndLadders/SnakesAndLadders.WebApi/obj
