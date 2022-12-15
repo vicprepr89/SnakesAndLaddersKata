@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SnakesAndLadders.Application\SnakesAndLadders.Application.csproj" />
+    <ProjectReference Include="..\SnakesAndLadders.WebApi\SnakesAndLadders.WebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>

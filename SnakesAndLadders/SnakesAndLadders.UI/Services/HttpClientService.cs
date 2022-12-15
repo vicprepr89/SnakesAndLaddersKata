@@ -1,11 +1,12 @@
-﻿using System.Net;
-using Newtonsoft.Json;
-using Polly;
-using SnakesAndLadders.Application.Dto;
-using SnakesAndLadders.UI.Helpers;
-
-namespace SnakesAndLadders.UI.Services
+﻿namespace SnakesAndLadders.UI.Services
 {
+    using System.Net;
+    using Newtonsoft.Json;
+    using Polly;
+    using SnakesAndLadders.Application.Dto;
+    using SnakesAndLadders.UI.Helpers;
+    using SnakesAndLadders.WebApi.Helpers;
+
     public class HttpClientService
     {
         private const string AcceptHeaderKey = "Accept";
@@ -18,13 +19,23 @@ namespace SnakesAndLadders.UI.Services
 
         private readonly BackendConfig _backendConfig;
 
-        public HttpClientService(BackendConfig backendConfig) => _backendConfig = backendConfig;
+        public HttpClientService(BackendConfig backendConfig)
+        {
+            _backendConfig = backendConfig;
+        }
 
-        public async Task<IEnumerable<UserDto>> GetUsersAsync()
+        public async Task<UserDto[]> GetUsersAsync()
         {
             IEnumerable<UserDto>? users = await CallBackendAsync<IEnumerable<UserDto>>(HttpMethod.Get, UsersEndpoint);
 
-            return users ?? Enumerable.Empty<UserDto>();
+            return users?.ToArray() ?? Array.Empty<UserDto>();
+        }
+
+        public async Task<int> GenerateFirstUserIdAsync()
+        {
+            int firstUserId = await CallBackendAsync<int>(HttpMethod.Get, $"{UsersEndpoint}/generateFirst");
+
+            return firstUserId;
         }
 
         public async Task<int> GetUserPosition(int id)
@@ -38,12 +49,12 @@ namespace SnakesAndLadders.UI.Services
         /// Moves the user position accord to generated dice roll and returns the new user position.
         /// </summary>
         /// <param name="id">The user identifier.</param>
-        /// <returns>The new user position.</returns>
-        public async Task<int> MoveUserPosition(int id)
+        /// <returns>The dice roll value and the new user position.</returns>
+        public async Task<MoveUserPositionResult> MoveUserPosition(int id)
         {
-            int newUserPosition = await CallBackendAsync<int>(HttpMethod.Post, $"{UsersEndpoint}/{id}/move");
+            MoveUserPositionResult? result = await CallBackendAsync<MoveUserPositionResult>(HttpMethod.Post, $"{UsersEndpoint}/{id}/move");
 
-            return newUserPosition;
+            return result ?? throw new Exception($"The positon of the user '{id}' could not be moved.");
         }
 
         public async Task<bool> UserHasWonAsync(int id)

@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using SnakesAndLadders.Application.Dto;
-using SnakesAndLadders.Application.Interfaces;
-
 namespace SnakesAndLadders.WebApi.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using SnakesAndLadders.Application.Dto;
+    using SnakesAndLadders.Application.Interfaces;
+    using SnakesAndLadders.WebApi.Helpers;
+
     [ApiController]
     [Route("[controller]")]
     public class UsersController : ControllerBase
@@ -29,6 +30,25 @@ namespace SnakesAndLadders.WebApi.Controllers
             return Ok(_userService.GetUsers());
         }
 
+        [HttpGet("generateFirst")]
+        public ActionResult<int> GenerateFirstUserId()
+        {
+            _logger.LogInformation("Generating the identifier of first user ...");
+
+            IEnumerable<UserDto> users = _userService.GetUsers();
+
+            if (!users.Any())
+            {
+                return NotFound("There are no users.");
+            }
+
+            List<(int UserId, int DiceRoll)> usersDicesRolls = users.Select(u => (u.Id, _diceRollService.RollDice())).ToList();
+
+            int maxDiceRoll = usersDicesRolls.Max(e => e.DiceRoll);
+
+            return Ok(usersDicesRolls.First(e => e.DiceRoll == maxDiceRoll).UserId);
+        }
+
         [HttpGet("{id:int}/position")]
         public ActionResult<int> GetUserPosition(int id)
         {
@@ -45,9 +65,9 @@ namespace SnakesAndLadders.WebApi.Controllers
         /// Moves the user position accord to generated dice roll and returns the new user position.
         /// </summary>
         /// <param name="id">The user identifier.</param>
-        /// <returns>The new user position.</returns>
+        /// <returns>The dice roll value and the new user position.</returns>
         [HttpPost("{id:int}/move")]
-        public ActionResult<int> MoveUserPosition(int id)
+        public ActionResult<MoveUserPositionResult> MoveUserPosition(int id)
         {
             try
             {
@@ -61,7 +81,11 @@ namespace SnakesAndLadders.WebApi.Controllers
 
                 return newUserPosition is null
                     ? NotFound($"The user with the identifier '{id}' does not exist.")
-                    : Ok(newUserPosition);
+                    : Ok(new MoveUserPositionResult
+                    {
+                        DiceRollValue = diceRollValue,
+                        NewUserPosition = newUserPosition.Value
+                    });
             }
             catch (ArgumentOutOfRangeException ex)
             {
