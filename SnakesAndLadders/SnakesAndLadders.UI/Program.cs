@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.Configuration;
-using SnakesAndLadders.Application.Dto;
-using SnakesAndLadders.UI.Helpers;
-using SnakesAndLadders.UI.Services;
-
-namespace SnakesAndLadders.UI
+﻿namespace SnakesAndLadders.UI
 {
-    internal class Program
+    using System.Linq;
+    using Microsoft.Extensions.Configuration;
+    using SnakesAndLadders.Application.Dto;
+    using SnakesAndLadders.UI.Helpers;
+    using SnakesAndLadders.UI.Services;
+    using SnakesAndLadders.WebApi.Helpers;
+
+    internal static class Program
     {
         private const string ConfigFilename = "config.json";
 
@@ -17,16 +19,11 @@ namespace SnakesAndLadders.UI
         {
             try
             {
-                // Load the app configuration from a JSON file.
-                IConfigurationBuilder configBuilder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile(ConfigFilename, optional: false);
+                IConfigurationRoot config = LoadAppConfigFromJsonFile();
 
-                IConfiguration config = configBuilder.Build();
+                SetAppTitle(config);
 
-                Console.Title = config[TitleKey] ?? string.Empty;
-
-                BackendConfig? backendConfig = config.GetSection(BackendConfigfKey).Get<BackendConfig>();
+                BackendConfig? backendConfig = GetBackendConfig(config);
 
                 if (backendConfig is null)
                 {
@@ -36,45 +33,58 @@ namespace SnakesAndLadders.UI
                     return;
                 }
 
-                // Initialize the client to call the backend.
                 HttpClientService httpClientService = new(backendConfig!);
 
-                IEnumerable<UserDto> users = await httpClientService.GetUsersAsync();
+                UserDto[] users = await httpClientService.GetUsersAsync();
 
                 Console.WriteLine(@$"Welcome to Snakes And Ladders!
-Number of players: {users.Count()} ({string.Join(", ", users.Select(u => $"Player {u.Id}"))})");
+Number of players: {users.Length} ({string.Join(", ", users.Select(u => $"Player {u.Id}"))})");
+
+                Console.WriteLine("Randomly determining the first user...");
+
+                int currentPlayerId = await httpClientService.GenerateFirstUserIdAsync();
+
+                Console.WriteLine($"First user will be Player {currentPlayerId}");
 
                 Console.WriteLine("Starting game...");
 
-                int currentPlayerId = -1;
+                int currentPlayerIndex = GetCurrentPlayerIndex(users, currentPlayerId);
+
+                UserDto currentPlayer;
                 int currentPlayerPosition;
                 bool currentPlayerHasWon;
 
                 do
                 {
-                    currentPlayerId++;
-
-                    if (currentPlayerId >= users.Count())
+                    if (currentPlayerIndex >= users.Length)
                     {
-                        currentPlayerId = 0;
+                        currentPlayerIndex = 0;
                     }
 
-                    currentPlayerPosition = await httpClientService.GetUserPosition(currentPlayerId);
+                    currentPlayer = users[currentPlayerIndex];
+
+                    currentPlayerPosition = await httpClientService.GetUserPosition(currentPlayer.Id);
 
                     Console.WriteLine();
-                    Console.WriteLine($"Player {currentPlayerId} - Current Position: {currentPlayerPosition}");
+                    Console.WriteLine($"Player {currentPlayer.Id} - Current Position: {currentPlayerPosition}");
                     Console.Write(">>> Press any key to roll the dice! <<<");
                     _ = Console.ReadLine();
 
-                    currentPlayerPosition = await httpClientService.MoveUserPosition(currentPlayerId);
+                    MoveUserPositionResult moveUserPositionResult = await httpClientService.MoveUserPosition(currentPlayer.Id);
 
-                    Console.WriteLine($"Player {currentPlayerId} - New Position: {currentPlayerPosition}");
+                    Console.WriteLine($"Player {currentPlayer.Id} has rolled the dice and has rolled a {moveUserPositionResult.DiceRollValue}");
 
-                    currentPlayerHasWon = await httpClientService.UserHasWonAsync(currentPlayerId);
+                    currentPlayerPosition = moveUserPositionResult.NewUserPosition;
+
+                    Console.WriteLine($"Player {currentPlayer.Id} - New Position: {currentPlayerPosition}");
+
+                    currentPlayerHasWon = await httpClientService.UserHasWonAsync(currentPlayer.Id);
+
+                    currentPlayerIndex++;
                 }
                 while (!currentPlayerHasWon);
 
-                Console.WriteLine($"*** Player {currentPlayerId} has won! ***");
+                Console.WriteLine($"*** Player {currentPlayer.Id} has won! ***");
             }
             catch (Exception ex)
             {
@@ -84,6 +94,37 @@ Number of players: {users.Count()} ({string.Join(", ", users.Select(u => $"Playe
             {
                 _ = Console.ReadLine();
             }
+        }
+
+        private static IConfigurationRoot LoadAppConfigFromJsonFile()
+        {
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(ConfigFilename, optional: false);
+
+            return configBuilder.Build();
+        }
+
+        private static void SetAppTitle(IConfigurationRoot config)
+        {
+            Console.Title = config[TitleKey] ?? string.Empty;
+        }
+
+        private static BackendConfig? GetBackendConfig(IConfigurationRoot config)
+        {
+            return config.GetSection(BackendConfigfKey).Get<BackendConfig>();
+        }
+        private static int GetCurrentPlayerIndex(UserDto[] users, int currentPlayerId)
+        {
+            for (int i = 0; i < users.Length; i++)
+            {
+                if (users[i].Id == currentPlayerId)
+                {
+                    return i;
+                }
+            }
+
+            throw new InvalidOperationException($"The user with the identifier {currentPlayerId} does not exist in the specified collection.");
         }
     }
 }

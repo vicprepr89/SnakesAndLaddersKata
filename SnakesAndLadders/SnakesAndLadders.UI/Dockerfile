@@ -2,22 +2,22 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["SnakesAndLadders.Data/SnakesAndLadders.Data.csproj", "SnakesAndLadders.Data/"]
 COPY ["SnakesAndLadders.Application/SnakesAndLadders.Application.csproj", "SnakesAndLadders.Application/"]
 COPY ["SnakesAndLadders.WebApi/SnakesAndLadders.WebApi.csproj", "SnakesAndLadders.WebApi/"]
-RUN dotnet restore "SnakesAndLadders.WebApi/SnakesAndLadders.WebApi.csproj"
+COPY ["SnakesAndLadders.UI/SnakesAndLadders.UI.csproj", "SnakesAndLadders.UI/"]
+RUN dotnet restore "SnakesAndLadders.UI/SnakesAndLadders.UI.csproj"
 COPY . .
-WORKDIR "/src/SnakesAndLadders.WebApi"
-RUN dotnet build "SnakesAndLadders.WebApi.csproj" -c Release -o /app/build
+WORKDIR "/src/SnakesAndLadders.UI"
+RUN dotnet build "SnakesAndLadders.UI.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "SnakesAndLadders.WebApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "SnakesAndLadders.UI.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SnakesAndLadders.WebApi.dll"]
+ENTRYPOINT ["dotnet", "SnakesAndLadders.UI.dll"]

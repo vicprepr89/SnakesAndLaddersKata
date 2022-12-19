@@ -14,3 +14,8 @@
 /SnakesAndLadders/SnakesAndLadders.UI/obj
 /SnakesAndLadders/SnakesAndLadders.WebApi/bin/Debug/net6.0
 /SnakesAndLadders/SnakesAndLadders.WebApi/obj
+/SnakesAndLadders/SnakesAndLadders.Application/bin/Release/net6.0
+/SnakesAndLadders/SnakesAndLadders.Application.Tests/bin/Release/net6.0
+/SnakesAndLadders/SnakesAndLadders.Data/bin/Release/net6.0
+/SnakesAndLadders/SnakesAndLadders.UI/bin/Release/net6.0
+/SnakesAndLadders/SnakesAndLadders.WebApi/bin/Release/net6.0

@@ -11,7 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SnakesAndLadders.WebApi", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SnakesAndLadders.UI", "SnakesAndLadders.UI\SnakesAndLadders.UI.csproj", "{6B0C3E9D-15C5-469B-A674-5511E273D442}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnakesAndLadders.Application.Tests", "SnakesAndLadders.Application.Tests\SnakesAndLadders.Application.Tests.csproj", "{FD155A9C-AC05-4FDE-BA48-45C1D47F1483}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SnakesAndLadders.Application.Tests", "SnakesAndLadders.Application.Tests\SnakesAndLadders.Application.Tests.csproj", "{FD155A9C-AC05-4FDE-BA48-45C1D47F1483}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F7B06954-479D-4562-8807-B36B1B8E088B}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
