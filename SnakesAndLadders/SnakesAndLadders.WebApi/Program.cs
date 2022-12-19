@@ -1,7 +1,7 @@
-using SnakesAndLadders.Application.Startup;
-
 namespace SnakesAndLadders.Web
 {
+    using SnakesAndLadders.Application.Startup;
+
     public class Program
     {
         public static void Main(string[] args)
@@ -27,8 +27,6 @@ namespace SnakesAndLadders.Web
                 _ = app.UseSwagger();
                 _ = app.UseSwaggerUI();
             }
-
-            _ = app.UseHttpsRedirection();
 
             _ = app.MapControllers();
 

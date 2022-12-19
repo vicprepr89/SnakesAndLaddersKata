@@ -1,6 +1,6 @@
 {
     "Title": "Snakes And Ladders",
     "BackendConfig": {
-        "Url": "https://localhost:44376"
-    }
+      "Url": "http://web-api"
+  }
 }

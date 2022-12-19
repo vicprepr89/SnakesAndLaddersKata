@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SnakesAndLadders.UI": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
