@@ -1,0 +1,12 @@
+services:
+ web-api:
+   build:
+     context: .
+     dockerfile: './SnakesAndLadders.WebApi/Dockerfile'
+   restart: always
+ ui:
+   build:
+     context: .
+     dockerfile: './SnakesAndLadders.UI/Dockerfile'
+   depends_on:
+     - web-api
